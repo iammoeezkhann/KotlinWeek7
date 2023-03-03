@@ -3,7 +3,7 @@ package com.example.bmi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-
+import androidx.lifecycle.ViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
@@ -18,34 +18,34 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 import com.example.bmi.ui.theme.BMITheme
-import com.google.android.filament.Material
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val bmiViewModel = viewModel<BmiViewModel>()
             BMITheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                   Bmi()
+                    Bmi(bmiViewModel)
                 }
             }
         }
     }
 }
 
-@Composable
-fun Bmi() {
-    var heightInput: String by remember { mutableStateOf("") }
-    var weightInput: String by remember { mutableStateOf("") }
-    val height = heightInput.toFloatOrNull() ?: 0.0f
-    val weight = weightInput.toIntOrNull() ?: 0
-    val bmi = if (weight * height > 0 ) weight / (height * height) else 0.0
 
+
+
+@Composable
+fun Bmi(bmiViewModel: BmiViewModel) {
     Column (
         modifier = Modifier.padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -60,23 +60,23 @@ fun Bmi() {
                 .padding(top = 16.dp, bottom = 16.dp)
         )
         OutlinedTextField(
-            value = heightInput,
-            onValueChange = { heightInput = it.replace(',', '.') },
+            value = bmiViewModel.heightInput,
+            onValueChange = { bmiViewModel.updateHeightInput(it.replace(',', '.')) },
             label = {Text("Height") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
-            value = weightInput,
-            onValueChange = { weightInput = it.replace(',', '.') },
+            value = bmiViewModel.weightInput,
+            onValueChange = { bmiViewModel.updateWeightInput(it.replace(',', '.')) },
             label = { Text("Weight") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
 
         )
-        Text(text = stringResource(R.string.result, String.format("%.2f",bmi).replace(',','.')))
+        Text(text = stringResource(R.string.result, String.format("%.2f",bmiViewModel.bmi).replace(',','.')))
 
     }
 }
@@ -87,7 +87,7 @@ fun Bmi() {
 @Composable
 fun DefaultPreview() {
     BMITheme {
-        Bmi()
-
+        val bmiViewModel = remember { BmiViewModel() }
+        Bmi(bmiViewModel)
     }
 }
